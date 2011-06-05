@@ -13,12 +13,10 @@ import json
 def parse_material(lines):
     m = {}
     try:
-        m['_id'] = int(lines[0].split()[0])
+        # _id is, unexpectedly, actually a string
+        m['_id'] = lines[0].split()[0]
         m['name'] = ""
-        if lines[1].strip().endswith(')'):
-            m['name'] = " ".join(lines[1][6:].split()[:-1])
-        else:
-            m['name'] = lines[1][6:].strip()
+        m['name'] = lines[1][6:].strip()
         m['type'] = lines[0][75]
         m['phase'] = lines[0][64]
         num_elements = 1
@@ -29,7 +27,13 @@ def parse_material(lines):
             num_elements = int(lines[0][67])
         m['atomic_weight'] = float(lines[0][15:].split()[0])
         m['density'] = float(lines[0][53:].split()[0])
-        
+       
+        # Clean up name (it gets a bunch of junk that isn't JSON-safe...)
+        while m['name'].find('#') >= 0:
+            m['name'] = " ".join(m['name'].split()[:-1])
+        m['name'] = m['name'].replace('=', "equals")
+
+
         # Expand type and phase chars out into full string
         m['type'] = {
             'E': "Element",
@@ -72,7 +76,13 @@ def parse_material(lines):
                     else:
                         m['notes'] += l[6:]
         if m['notes']:
+            m['notes'] = m['notes'].replace('\\', "\\\\")
+            m['notes'] = m['notes'].replace('<', "\<")
+            m['notes'] = m['notes'].replace('>', "\>")
+            m['notes'] = m['notes'].replace('=', "\=")
             m['notes'] = m['notes'].strip()
+            m['notes'] = "Notes aren't working right now."
+        
         if m['atomic_weight'] < 0:
             m['atomic_weight'] = None
     except Exception, e:
@@ -114,7 +124,6 @@ def main ():
 
     # Ok, now print out in JSON format...
     print json.dumps(materials, indent=4)
-
 
 if __name__ == '__main__':
     try:

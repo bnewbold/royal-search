@@ -23,7 +23,7 @@
     "notes": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 5,
-        "datatype"     : {"__class__": "TextAttribute"}
+        "datatype"     : {"__class__": "TextType"}
     },
     "atomic_weight": {
         "__class__"    : "AttributeDescriptor",
