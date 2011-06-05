@@ -1,0 +1,53 @@
+{
+    "__class__": "StructSchema",
+    "name": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 1,
+        "datatype"     : {"__class__": "StringType"}
+    },
+    "chemical_symbol": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 2,
+        "datatype"     : {"__class__": "StringType"}
+    },
+    "type": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 3,
+        "datatype"     : {"__class__": "StringType"}
+    },
+    "phase": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 4,
+        "datatype"     : {"__class__": "StringType"}
+    },
+    "notes": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 5,
+        "datatype"     : {"__class__": "TextAttribute"}
+    },
+    "atomic_weight": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 6,
+        "datatype"     : {"__class__": "DoubleType"}
+    },
+    "density": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 7,
+        "datatype"     : {"__class__": "DoubleType"}
+    },
+    "melting_point": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 8,
+        "datatype"     : {"__class__": "DoubleType"}
+    },
+    "boiling_point": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 9,
+        "datatype"     : {"__class__": "DoubleType"}
+    },
+    "index_of_refraction": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 10,
+        "datatype"     : {"__class__": "DoubleType"}
+    }
+}

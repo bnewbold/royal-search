@@ -1,0 +1,14 @@
+
+index (int)
+name (string)
+chemical_symbol (string)
+type (string)
+phase (string)
+notes (text)
+atomic_weight (double)
+density (double)
+melting_point (double)
+boiling_point (double)
+index_of_refraction (double)
+#incl_elements (list of references to material)
+
