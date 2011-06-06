@@ -75,13 +75,11 @@ def parse_material(lines):
                         m['notes'] = l[6:]
                     else:
                         m['notes'] += l[6:]
+
+        # Fix a weird issue with equal signs in JSON
         if m['notes']:
-            m['notes'] = m['notes'].replace('\\', "\\\\")
-            m['notes'] = m['notes'].replace('<', "\<")
-            m['notes'] = m['notes'].replace('>', "\>")
-            m['notes'] = m['notes'].replace('=', "\=")
+            m['notes'] = m['notes'].replace('=', "equals")
             m['notes'] = m['notes'].strip()
-            m['notes'] = "Notes aren't working right now."
         
         if m['atomic_weight'] < 0:
             m['atomic_weight'] = None
