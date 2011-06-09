@@ -28,10 +28,9 @@ def parse_material(lines):
         m['atomic_weight'] = float(lines[0][15:].split()[0])
         m['density'] = float(lines[0][53:].split()[0])
        
-        # Clean up name (it gets a bunch of junk that isn't JSON-safe...)
+        # Clean up name (remove last token if garbage is found)
         while m['name'].find('#') >= 0:
             m['name'] = " ".join(m['name'].split()[:-1])
-        m['name'] = m['name'].replace('=', "equals")
 
 
         # Expand type and phase chars out into full string
