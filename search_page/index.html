@@ -4,29 +4,49 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
 <script src="jquery-1.6.1.min.js"></script>
 <style type="text/css">
+body {width: 800px;}
 .error {padding: 15px; background-color: yellow; border: 4px solid orange; color:red;}
 table {border: 1px solid black; border-collapse: collapse; border-spacing:2px;}
+table.layout {border: none; border-spacing: 0px; }
 th, td {border-width: 1px; border-style: inset; border-color: gray; padding: 2px;}
 dt {font-weight: bold;}
+.search_form {position: absolute; left: 200px; top: 20px;}
 .code {color: white; background-color: black; border: 3px gray solid; 
     width: 640px; padding: 3px; margin-left: 10px;}
+#facet_box { position: absolute; height: 100%; overflow: hidden;
+    width: 200px; margin: 10px; padding-right: 20px; padding-top: 0px;
+    padding-bottom: 15px; border-right: 2px solid black; }
+#results { position: absolute; left: 230px; }
+.facet_title {width: 150px; font-weight: bold; font-size: larger; 
+    margin-top: 10px;}
+.facet_option {width: 100%; margin-left: 4px; padding: 2px; }
+.facet_option:hover {background-color: #DDD;}
+.facet_option .count {float: right;}
+.facet_option_selected {width: 100%; margin-left: 4px; padding: 2px; 
+               background-color: #BBB;}
+.facet_option_selected:hover {background-color: #BBB;}
+.facet_option_selected .count {float: right;}
+.material {margin-left: 30px; margin-top: 0px; margin-bottom: 0px;}
+.material span {font-size: smaller; font-family: courier;}
 </style>
 </head>
-<body style="margin: 25px; font-family: helvetica;"> 
-<a name="top"><h1 style="border-bottom: 2px solid; margin-bottom: 2px;">
-Materials Search</h1></a>
-<i style="font-size:smaller;">
-A <a href="http://thriftdb.com/">ThriftDB</a> demo.
-</i><br>
-<p>
-
-<div id="query_box" style="padding: 20px; background-color: #BBB; border: 3px solid gray; margin: 20px;">
-  <b>Enter your query:</b>
+<body style="font-family: helvetica;" onload="fetch_facets();"> 
+<div style="width: 100%; height: 50px; padding: 5px; 
+            border-bottom: 2px solid black;">
+<span style="font-size: 2em; margin-right: 20px; color: blue;">
+Materials!</span>
+<form action="#" class="search_form">
   <input type="text" id="query" style="width: 400px;" />
-  <button id="search_button">Search</button>
+  <button id="search_button">Search!</button>
+</form>
 </div>
 
-<div id="results"> 
+<div id="facet_box">
+<i>Fetching facets...</i>
+<!-- these get filled in dynamically -->
+</div>
+<div id="results" style="margin: 20px;"> 
+<i>Enter a search query or select a facet from the left!</i>
 </div>
 
 <div id="debug" class="code" style="visibility: hidden;">
@@ -34,33 +54,94 @@ A <a href="http://thriftdb.com/">ThriftDB</a> demo.
 </div>
 
 <script>
-var qurl = "http://api.thriftdb.com/test_bucket/materials/_search?callback=?";
-var query;
-var gdata;
-
-$("#search_button").click(function(){
-    query = $("#query").val();
-    $.getJSON(qurl,
-        { 
-            suppress_status_codes: "true",
-            q: query 
+var thriftdb_query_url = "http://api.thriftdb.com/test_bucket/materials/_search?callback=?";
+var query_params = {
+    facet: {
+        fields: {
+            phase: {
+                include:  true,
+            },
+            type: {
+                include:  true,
+            },
         },
+    },
+    filter: {
+        fields: {
+            phase: '',
+            type: '',
+        },
+    },
+    suppress_status_codes: true,
+    };
+
+var facet_info; 
+
+function add_facets(list) {
+    $("#facet_box").html("");
+    $.each(list, function(facet, options) {
+        $("#facet_box").append("<div class='facet_title'>" + 
+            facet + "</div>");
+        $.each(options.facets, function(option_index, option) {
+            style_class = "facet_option";
+            console.log(option);
+            if(query_params.filter.fields[facet] == option.value) {
+                style_class = "facet_option_selected";
+            }
+            $("#facet_box").append("<div class='"+style_class+"' id='facet_" + 
+                facet + "_" + option_index + "' " + 
+                "onclick='toggle_facet(this);'>" + 
+                option.value+ "<span class='count'>" +
+                option.count + "</span></div>");
+            
+        });
+    });
+}
+
+function toggle_facet(facet) {
+    var option = facet.id.split("_")[1];
+    var name = facet.id.split("_")[2];
+    name = facet_info.fields[option].facets[name].value;
+    if(facet.classList[0].match(/selected$/)) {
+        facet.classList[0] = "facet_option";
+        query_params.filter.fields[option] = '';
+    } else {
+        facet.classList.add("facet_option_selected");
+        query_params.filter.fields[option] = name;
+    }
+    do_query(query_params);
+}
+
+function fetch_facets() {
+    do_query(query_params);
+}
+
+function do_query(params) {
+    $.getJSON(thriftdb_query_url, params,
         function(data) {
-            gdata = data;
             $("#debug").text("Got a response...");
-            $("#results").html('<h4><i>Got ' + data.hits + ' results for "' + data.request.q + '"</i></h4>');
+            $("#results").html('<i>Got ' + data.hits + ' results...<br>');
             $.each(data.results, function(i, material){
-                $("#results").append('<p style="margin-left:10px;"><b>' + 
+                $("#results").append('<br><b>'+
                     material.item.name + '</b><br>' +
-                    "Chemical symbol: "+material.item.chemical_symbol+'<br>'+
-                    "Type: "+material.item.type+'<br>'+
-                    "Phase: "+material.item.phase+'<br>'+
-                    "Density: "+material.item.density+'<br>'+
+                    '<p class="material">' + 
+                    "Type: <span>"+material.item.type+'</span><br>'+
+                    "Phase: <span>"+material.item.phase+'</span><br>'+
+                    "Density: <span>"+material.item.density+'</span><br>'+
+                    "Chemical symbol: <span>"+material.item.chemical_symbol+
+                        '</span>'+
                     '</p>');
                 }
             );
+            add_facets(data.facet_results.fields);
+            facet_info = data.facet_results;
         }
     );
+}
+
+$("#search_button").click(function(){
+    query_params.q = $("#query").val();
+    do_query(query_params);
 });
 
 </script>
