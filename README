@@ -21,6 +21,7 @@ Put all the .txt metadata files in a new folder called "metadata", then run:
   $ open search_page/index.html   # or firefox or chromium-browser
 
 See also: http://news.ycombinator.com/item?id=2789709
+Try it: http://robocracy.org/royal-search/
 
 There seems to be an encoding bug (sigh) which results in a couple hundred
 papers getting lost when loaded into elastic search. And clicking on the facets
