@@ -1,14 +1,11 @@
-
-index (int)
-name (string)
-chemical_symbol (string)
-type (string)
-phase (string)
-notes (text)
-atomic_weight (double)
-density (double)
-melting_point (double)
-boiling_point (double)
-index_of_refraction (double)
-#incl_elements (list of references to material)
-
+TY  - type
+T1  - title
+JF  - journal_name
+VL  - volume (int)
+SP  - start_page (int)
+EP  - end_page (int)
+PY  - date (date, eg 1985-04-12T23:30:50.52Z)
+UR  - doi_url
+M3  - doi
+AU  - authors (multiple)
+ER  -

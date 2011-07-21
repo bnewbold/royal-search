@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head><title>Materials Search</title>
+<head><title>Old Royal Papers Search</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
 <script src="jquery-1.6.1.min.js"></script>
 <style type="text/css">
@@ -26,15 +26,15 @@ dt {font-weight: bold;}
                background-color: #BBB;}
 .facet_option_selected:hover {background-color: #BBB;}
 .facet_option_selected .count {float: right;}
-.material {margin-left: 30px; margin-top: 0px; margin-bottom: 0px;}
-.material span {font-size: smaller; font-family: courier;}
+.paper {margin-left: 30px; margin-top: 0px; margin-bottom: 0px;}
+.paper span {font-size: smaller; font-family: courier;}
 </style>
 </head>
 <body style="font-family: helvetica;" onload="fetch_facets();"> 
 <div style="width: 100%; height: 50px; padding: 5px; 
             border-bottom: 2px solid black;">
 <span style="font-size: 2em; margin-right: 20px; color: blue;">
-Materials!</span>
+Old Papers!</span>
 <form action="#" class="search_form">
   <input type="text" id="query" style="width: 400px;" />
   <button id="search_button">Search!</button>
@@ -54,22 +54,26 @@ Materials!</span>
 </div>
 
 <script>
-var thriftdb_query_url = "http://api.thriftdb.com/test_bucket/materials/_search?callback=?";
+var thriftdb_query_url = "http://api.thriftdb.com/test_bucket/old_royal_papers/_search?callback=?";
 var query_params = {
     facet: {
         fields: {
-            phase: {
+            journal_name: {
                 include:  true,
+                limit: 5,
             },
-            type: {
+            date_year: {
                 include:  true,
+                limit: 8,
+            },
+            authors: {
+                include:  true,
+                limit: 8,
             },
         },
     },
     filter: {
         fields: {
-            phase: '',
-            type: '',
         },
     },
     suppress_status_codes: true,
@@ -90,8 +94,8 @@ function add_facets(list) {
             }
             $("#facet_box").append("<div class='"+style_class+"' id='facet_" + 
                 facet + "_" + option_index + "' " + 
-                "onclick='toggle_facet(this);'>" + 
-                option.value+ "<span class='count'>" +
+                "onclick='toggle_facet(this);'><i>" + 
+                option.value+ "</i><span class='count'>" +
                 option.count + "</span></div>");
             
         });
@@ -121,15 +125,15 @@ function do_query(params) {
         function(data) {
             $("#debug").text("Got a response...");
             $("#results").html('<i>Got ' + data.hits + ' results...<br>');
-            $.each(data.results, function(i, material){
+            $.each(data.results, function(i, paper){
                 $("#results").append('<br><b>'+
-                    material.item.name + '</b><br>' +
-                    '<p class="material">' + 
-                    "Type: <span>"+material.item.type+'</span><br>'+
-                    "Phase: <span>"+material.item.phase+'</span><br>'+
-                    "Density: <span>"+material.item.density+'</span><br>'+
-                    "Chemical symbol: <span>"+material.item.chemical_symbol+
-                        '</span>'+
+                    paper.item.title+ '</b><br>' +
+                    '<p class="paper">' + 
+                    "Journal: <span>"+paper.item.journal_name+'</span><br>'+
+                    "Authors: <span>"+paper.item.authors+'</span><br>'+
+                    "Year: <span>"+paper.item.date_year+'</span><br>'+
+                    "DOI: <span><a href='"+paper.item.doi_url+"'>"+
+                      paper.item.doi+'</a></span><br>'+
                     '</p>');
                 }
             );

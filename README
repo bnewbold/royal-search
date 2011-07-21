@@ -1,5 +1,11 @@
 
 This is an index of old public domain Royal Society papers. 
 
-http://news.ycombinator.com/item?id=2789709
+Put all the .txt metadata files in a new folder called "metadata", then run:
+
+  $ ./parse_source_data.py metadata/* > data.json
+  $ ./create.sh
+  $ open search_page/index.html   # or firefox or chromium-browser
+
+See also: http://news.ycombinator.com/item?id=2789709
 

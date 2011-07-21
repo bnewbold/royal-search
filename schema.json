@@ -1,53 +1,61 @@
 {
     "__class__": "StructSchema",
-    "name": {
+    "title": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 1,
         "datatype"     : {"__class__": "StringType"}
     },
-    "chemical_symbol": {
+    "journal_name": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 2,
         "datatype"     : {"__class__": "StringType"}
     },
-    "type": {
+    "volume": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 3,
-        "datatype"     : {"__class__": "StringType"}
+        "datatype"     : {"__class__": "IntegerType"}
     },
-    "phase": {
+    "start_page": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 4,
-        "datatype"     : {"__class__": "StringType"}
+        "datatype"     : {"__class__": "IntegerType"}
     },
-    "notes": {
+    "end_page": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 5,
-        "datatype"     : {"__class__": "TextType"}
+        "datatype"     : {"__class__": "IntegerType"}
     },
-    "atomic_weight": {
+    "page_length": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 6,
-        "datatype"     : {"__class__": "DoubleType"}
+        "datatype"     : {"__class__": "IntegerType"}
     },
-    "density": {
+    "date_year": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 7,
-        "datatype"     : {"__class__": "DoubleType"}
+        "datatype"     : {"__class__": "IntegerType"}
     },
-    "melting_point": {
+    "date_month": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 8,
-        "datatype"     : {"__class__": "DoubleType"}
+        "datatype"     : {"__class__": "IntegerType"}
     },
-    "boiling_point": {
+    "doi_url": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 9,
-        "datatype"     : {"__class__": "DoubleType"}
+        "datatype"     : {"__class__": "StringType"}
     },
-    "index_of_refraction": {
+    "doi": {
         "__class__"    : "AttributeDescriptor",
         "thrift_index" : 10,
-        "datatype"     : {"__class__": "DoubleType"}
+        "datatype"     : {"__class__": "StringType"}
+    },
+    "authors": {
+        "__class__"    : "AttributeDescriptor",
+        "thrift_index" : 11,
+        "datatype"     : {
+            "__class__"   : "ListType",  
+            "member_datatype": {"__class__": "StringType"}
+        }
     }
 }

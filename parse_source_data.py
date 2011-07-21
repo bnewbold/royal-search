@@ -3,124 +3,68 @@
 
 Typical usage is:
 
-    $ ./parse_source_data.py source_data/properties6.dat.txt > data.json
+    $ ./parse_source_data.py metadata/########.txt > data.json
 """
 
 import sys, os, traceback, optparse
 import time
 import json
 
-def parse_material(lines):
-    m = {}
-    try:
-        # _id is, unexpectedly, actually a string
-        m['_id'] = lines[0].split()[0]
-        m['name'] = ""
-        m['name'] = lines[1][6:].strip()
-        m['type'] = lines[0][75]
-        m['phase'] = lines[0][64]
-        num_elements = 1
-        if m['type'] in ['E', 'R']:
-            m['chemical_symbol'] = lines[1].split()[0]
-            num_elements = int(lines[0][67])
-        else:
-            num_elements = int(lines[0][67])
-        m['atomic_weight'] = float(lines[0][15:].split()[0])
-        m['density'] = float(lines[0][53:].split()[0])
-       
-        # Clean up name (remove last token if garbage is found)
-        while m['name'].find('#') >= 0:
-            m['name'] = " ".join(m['name'].split()[:-1])
+from datetime import datetime
 
+def parse_meta(name, lines):
+    p = {}
+    if name.startswith("metadata/"):
+        p['_id'] = name[9:].split('.')[0] # strip tailing ".txt"
+    else:
+        p['_id'] = name.split('.')[0] # strip tailing ".txt"
+    p['authors'] = []
+    for l in lines:
+        if l.startswith('T1'):
+            p['title'] = l[5:].strip()
+        elif l.startswith('JF'):
+            p['journal_name'] = l[5:].strip()
+        elif l.startswith('VL'):
+            p['volume'] = int(l[5:].strip())
+        elif l.startswith('SP'):
+            try:
+                p['start_page'] = int(l[5:].strip())
+            except ValueError:
+                pass
+        elif l.startswith('EP'):
+            try:
+                p['end_page'] = int(l[5:].strip())
+            except ValueError:
+                pass
+        elif l.startswith('PY'):
+            # UGH, python pre-1900 issues are infuriating
+            #p['date'] = datetime.strptime(l[5:].strip(), '%Y/%m/%d/')
+            the_date = datetime.strptime(l[5:].strip(), '%Y/%m/%d/')
+            p['date_year'] = the_date.year
+            p['date_month'] = the_date.month
+        elif l.startswith('UR'):
+            p['doi_url'] = l[5:].strip()
+        elif l.startswith('M3'):
+            p['doi'] = l[5:].strip()
+        elif l.startswith('AU'):
+            p['authors'].append(l[5:].strip())
 
-        # Expand type and phase chars out into full string
-        m['type'] = {
-            'E': "Element",
-            'R': "Radioactive Element",
-            'I': "Inorganic Compound",
-            'O': "Organic Compound",
-            'P': "Polymer",
-            'M': "Mixture",
-            'B': "Biological",
-            ' ': "[none]" }[m['type']]
-        m['phase'] = {
-            'S': "Solid",
-            'L': "Liquid",
-            'G': "Gas",
-            'D': "Diatomic Gas",
-            ' ': "[none]" }[m['phase']]
-        
-        m['melting_point'] = None
-        m['boiling_point'] = None
-        m['index_of_refraction'] = None
-        m['notes'] = None
-
-        # Check for extra info and notes
-        if len(lines) - num_elements > 3:
-            for l in lines[3+num_elements:]:
-                if l.lower().startswith("melti"):
-                    # this handles some format-breaking special cases
-                    if len(l) < 30:
-                        m['melting_point'] = float(l[10:].split()[0])
-                    else:
-                        m['melting_point'] = float(l[25:].split()[0])
-                elif l.lower().startswith("boili"):
-                    m['boiling_point'] = float(l[25:].split()[0])
-                elif l.lower().startswith("index"):
-                    m['index_of_refraction'] = float(l[25:].split()[0])
-                elif (l.lower().startswith("note:") or
-                      l.startswith("     ")):
-                    if not m['notes']:
-                        m['notes'] = l[6:]
-                    else:
-                        m['notes'] += l[6:]
-
-        # Fix a weird issue with equal signs in JSON
-        if m['notes']:
-            m['notes'] = m['notes'].replace('=', "equals")
-            m['notes'] = m['notes'].strip()
-        
-        if m['atomic_weight'] < 0:
-            m['atomic_weight'] = None
-    except Exception, e:
-        # This program is not robust...
-        print "----------------------------------------------"
-        print "UNEXPECTED ERROR!\n"
-        traceback.print_exc()
-        sys.exit()
-    
-    if options.verbose:
-        print m['_id']
-        print m['name']
-        print m['type']
-        print m['phase']
-        print m['atomic_weight']
-        print m['density']
-    
-    return m
+    if p.get('start_page') and p.get('end_page'):
+        p['page_length'] = p['end_page'] - p['start_page']
+    return p
 
 def main ():
-    """Reads, parses, and dumps materials one at a time.
+    """Reads, parses, and dumps a paper metadata file
     """
 
     global options, args
-    
-    materials = []
-    buff = []
-    f = open(args[0], "r")
-    for l in f.readlines():
-        if l.startswith("------"):
-            materials.append(parse_material(buff))
-            buff = []
-            continue;
-        buff.append(l)
-    
-    if options.verbose: 
-        print "----------------------------------------------"
-        print "Found " + str(len(materials)) + " materials"
 
-    # Ok, now print out in JSON format...
-    print json.dumps(materials, indent=4)
+    papers = []
+    for filename in args:
+        with open(filename, "r") as f:
+            paper_meta = parse_meta(filename, f.readlines())
+            papers.append(paper_meta)
+    print json.dumps(papers)
 
 if __name__ == '__main__':
     try:
@@ -129,7 +73,7 @@ if __name__ == '__main__':
         parser.add_option ('-v', '--verbose', action='store_true', default=False, help='verbose output')
         (options, args) = parser.parse_args()
         if len(args) < 1:
-            parser.error ('missing argument')
+            parser.error ('missing filename(s) argument')
         if options.verbose: print time.asctime()
         main()
         if options.verbose: print time.asctime()
