@@ -1,10 +1,5 @@
 
-This is intended to be a learning/tutorial project to demonstrate the ThriftDB
-search service using a publicly available dataset. 
+This is an index of old public domain Royal Society papers. 
 
-A set of bash and/or python scripts will demonstrate the construction of a
-ThriftDB bucket, parsing of the raw data into a schema, and upload to ThriftDB.
-A simple command line python script will demonstrate searching. A simple static
-HTML/JS web page will demonstrate fetching results remotely using via JSONP
-(cross-domain JSON requests via callbacks). 
+http://news.ycombinator.com/item?id=2789709
 
