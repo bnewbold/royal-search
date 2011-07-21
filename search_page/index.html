@@ -55,29 +55,6 @@ Old Papers!</span>
 
 <script>
 var query_url = "http://localhost:9200/oldpapers/_search?callback=?";
-var old_query_params = {
-    facet: {
-        fields: {
-            journal_name: {
-                include:  true,
-                limit: 5,
-            },
-            date_year: {
-                include:  true,
-                limit: 8,
-            },
-            authors: {
-                include:  true,
-                limit: 8,
-            },
-        },
-    },
-    filter: {
-        fields: {
-        },
-    },
-    suppress_status_codes: true,
-    };
 
 var query_params = {
   facets: {
