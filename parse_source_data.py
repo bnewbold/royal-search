@@ -12,12 +12,18 @@ import json
 
 from datetime import datetime
 
-def parse_meta(name, lines):
+def parse_meta(name, lines, noid=False):
     p = {}
     if name.startswith("metadata/"):
         p['_id'] = name[9:].split('.')[0] # strip tailing ".txt"
     else:
         p['_id'] = name.split('.')[0] # strip tailing ".txt"
+    # TODO: hack
+    #p['_id'] = int(p['_id'])
+    if noid:
+        p['id'] = p['_id']
+        p.pop('_id')
+
     p['authors'] = []
     for l in lines:
         if l.startswith('T1'):
@@ -62,15 +68,22 @@ def main ():
     papers = []
     for filename in args:
         with open(filename, "r") as f:
-            paper_meta = parse_meta(filename, f.readlines())
+            paper_meta = parse_meta(filename, f.readlines(), noid=options.noid)
             papers.append(paper_meta)
-    print json.dumps(papers)
+
+    if options.list:
+        print json.dumps(papers)
+    else:
+        for p in papers:
+            print json.dumps(p)
 
 if __name__ == '__main__':
     try:
         start_time = time.time()
         parser = optparse.OptionParser(formatter=optparse.TitledHelpFormatter(), usage=globals()['__doc__'], version='$Id$')
         parser.add_option ('-v', '--verbose', action='store_true', default=False, help='verbose output')
+        parser.add_option ('-l', '--list', action='store_true', default=False, help='output json as a list, not one-per-line')
+        parser.add_option ('-n', '--noid', action='store_true', default=False, help='skip the "_id" field in JSON output')
         (options, args) = parser.parse_args()
         if len(args) < 1:
             parser.error ('missing filename(s) argument')

@@ -54,8 +54,8 @@ Old Papers!</span>
 </div>
 
 <script>
-var query_url = "http://localhost:9200/oldpapers/_search?callback=?";
-var old_query_params = {
+var thriftdb_query_url = "http://api.thriftdb.com/test_bucket/old_royal_papers/_search?callback=?";
+var query_params = {
     facet: {
         fields: {
             journal_name: {
@@ -79,24 +79,6 @@ var old_query_params = {
     suppress_status_codes: true,
     };
 
-var query_params = {
-  facets: {
-    date_year: {
-      terms: {
-        field: "date_year",
-        size: 8
-      }
-    },
-    authors: {
-      terms: {
-        field: "authors",
-        size: 8,
-        exclude: ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-      }
-    }
-  }
-}
-
 var facet_info; 
 
 function add_facets(list) {
@@ -104,15 +86,15 @@ function add_facets(list) {
     $.each(list, function(facet, options) {
         $("#facet_box").append("<div class='facet_title'>" + 
             facet + "</div>");
-        $.each(options.terms, function(option_index, option) {
+        $.each(options.facets, function(option_index, option) {
             style_class = "facet_option";
-            //if(query_params.filter.term[facet] == option.value) {
-            //    style_class = "facet_option_selected";
-            //}
+            if(query_params.filter.fields[facet] == option.value) {
+                style_class = "facet_option_selected";
+            }
             $("#facet_box").append("<div class='"+style_class+"' id='facet-" + 
                 facet + "-" + option_index + "' " + 
                 "onclick='toggle_facet(this);'><i>" + 
-                option.term+ "</i><span class='count'>" +
+                option.value+ "</i><span class='count'>" +
                 option.count + "</span></div>");
             
         });
@@ -120,9 +102,9 @@ function add_facets(list) {
 }
 
 function toggle_facet(facet) {
-    console.log(facet_info);
     var option = facet.id.split("-")[1];
     var name = facet.id.split("-")[2];
+    console.log(facet);
     name = facet_info.fields[option].facets[name].value;
     if(facet.classList[0].match(/selected$/)) {
         facet.classList[0] = "facet_option";
@@ -139,33 +121,30 @@ function fetch_facets() {
 }
 
 function do_query(params) {
-    p = { source: JSON.stringify(params)};
-    $.getJSON(query_url, p, function(data) {
+    $.getJSON(thriftdb_query_url, params,
+        function(data) {
             $("#debug").text("Got a response...");
-            $("#results").html('<i>Got ' + data.hits.total + ' results...<br>');
-            $.each(data.hits.hits, function(i, paper){
+            $("#results").html('<i>Got ' + data.hits + ' results...<br>');
+            $.each(data.results, function(i, paper){
                 $("#results").append('<br><b>'+
-                    paper._source.title+ '</b><br>' +
+                    paper.item.title+ '</b><br>' +
                     '<p class="paper">' + 
-                    "Journal: <span>"+paper._source.journal_name+'</span><br>'+
-                    "Authors: <span>"+paper._source.authors+'</span><br>'+
-                    "Year: <span>"+paper._source.date_year+'</span><br>'+
-                    "DOI: <span><a href='"+paper._source.doi_url+"'>"+
-                      paper._source.doi+'</a></span><br>'+
+                    "Journal: <span>"+paper.item.journal_name+'</span><br>'+
+                    "Authors: <span>"+paper.item.authors+'</span><br>'+
+                    "Year: <span>"+paper.item.date_year+'</span><br>'+
+                    "DOI: <span><a href='"+paper.item.doi_url+"'>"+
+                      paper.item.doi+'</a></span><br>'+
                     '</p>');
                 }
             );
-            add_facets(data.facets);
-            facet_info = data.facets;
+            add_facets(data.facet_results.fields);
+            facet_info = data.facet_results;
         }
     );
 }
 
 $("#search_button").click(function(){
-    // HACK
-    query_params.query = {}
-    query_params.query.text = {}
-    query_params.query.text._all = $("#query").val();
+    query_params.q = $("#query").val();
     do_query(query_params);
 });
 
